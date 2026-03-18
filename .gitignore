@@ -205,3 +205,12 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Video files (large binaries)
+*.mp4
+*.mkv
+*.avi
+*.mov
+*.webm
+!inputs/intro_matched.mp4
+!inputs/outro_matched.mp4
