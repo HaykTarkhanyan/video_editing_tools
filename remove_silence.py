@@ -327,9 +327,11 @@ def main():
     log.info(f"Encoding done in {fmt_duration_short(encode_time)}")
 
     # ── Concatenate intro + main + outro if needed ──
+    # Stream-copy concat: intro/outro must already match the main video's
+    # format (use inputs/intro_matched.mp4 etc.). This is near-instant.
     concat_time = 0
     if prepared_intro or prepared_outro:
-        log.info("Concatenating intro/main/outro...")
+        log.info("Concatenating intro/main/outro (stream-copy)...")
         concat_start = time.time()
 
         concat_list = temp_dir / "concat.txt"
@@ -350,8 +352,7 @@ def main():
             "ffmpeg", "-y",
             "-f", "concat", "-safe", "0",
             "-i", str(concat_list),
-            *video_encoder_args(18, hw_encoder),
-            "-c:a", "aac", "-b:a", "128k",
+            "-c", "copy",
             "-movflags", "+faststart",
             str(output_path),
         ]
