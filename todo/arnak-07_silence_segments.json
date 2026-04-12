@@ -1,0 +1,116 @@
+{
+  "input": "C:\\Users\\hayk_\\OneDrive\\Desktop\\video_editing_tools\\todo\\arnak-07.mp4",
+  "threshold_seconds": 5.0,
+  "noise_db": -35,
+  "total_segments": 12,
+  "segments": [
+    {
+      "index": 0,
+      "start": 17.067,
+      "end": 24.572,
+      "duration": 7.505,
+      "start_display": "00:00:17.067",
+      "end_display": "00:00:24.572",
+      "action": "remove"
+    },
+    {
+      "index": 1,
+      "start": 127.517,
+      "end": 134.49,
+      "duration": 6.973,
+      "start_display": "00:02:07.517",
+      "end_display": "00:02:14.490",
+      "action": "remove"
+    },
+    {
+      "index": 2,
+      "start": 169.517,
+      "end": 180.874,
+      "duration": 11.357,
+      "start_display": "00:02:49.517",
+      "end_display": "00:03:00.874",
+      "action": "remove"
+    },
+    {
+      "index": 3,
+      "start": 316.024,
+      "end": 329.47,
+      "duration": 13.447,
+      "start_display": "00:05:16.024",
+      "end_display": "00:05:29.470",
+      "action": "remove"
+    },
+    {
+      "index": 4,
+      "start": 329.478,
+      "end": 354.828,
+      "duration": 25.349,
+      "start_display": "00:05:29.478",
+      "end_display": "00:05:54.828",
+      "action": "remove"
+    },
+    {
+      "index": 5,
+      "start": 613.878,
+      "end": 628.421,
+      "duration": 14.543,
+      "start_display": "00:10:13.878",
+      "end_display": "00:10:28.421",
+      "action": "remove"
+    },
+    {
+      "index": 6,
+      "start": 958.684,
+      "end": 964.852,
+      "duration": 6.168,
+      "start_display": "00:15:58.684",
+      "end_display": "00:16:04.852",
+      "action": "remove"
+    },
+    {
+      "index": 7,
+      "start": 978.765,
+      "end": 998.191,
+      "duration": 19.427,
+      "start_display": "00:16:18.765",
+      "end_display": "00:16:38.191",
+      "action": "remove"
+    },
+    {
+      "index": 8,
+      "start": 1833.11,
+      "end": 1845.62,
+      "duration": 12.514,
+      "start_display": "00:30:33.110",
+      "end_display": "00:30:45.620",
+      "action": "remove"
+    },
+    {
+      "index": 9,
+      "start": 1961.76,
+      "end": 1966.95,
+      "duration": 5.193,
+      "start_display": "00:32:41.760",
+      "end_display": "00:32:46.950",
+      "action": "remove"
+    },
+    {
+      "index": 10,
+      "start": 3852.94,
+      "end": 3858.65,
+      "duration": 5.715,
+      "start_display": "01:04:12.940",
+      "end_display": "01:04:18.650",
+      "action": "remove"
+    },
+    {
+      "index": 11,
+      "start": 3861.0,
+      "end": 3869.17,
+      "duration": 8.176,
+      "start_display": "01:04:21.000",
+      "end_display": "01:04:29.170",
+      "action": "remove"
+    }
+  ]
+}

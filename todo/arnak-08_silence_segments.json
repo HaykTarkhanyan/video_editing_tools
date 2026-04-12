@@ -1,0 +1,134 @@
+{
+  "input": "C:\\Users\\hayk_\\OneDrive\\Desktop\\video_editing_tools\\todo\\arnak-08.mp4",
+  "threshold_seconds": 5.0,
+  "noise_db": -35,
+  "total_segments": 14,
+  "segments": [
+    {
+      "index": 0,
+      "start": 0.0,
+      "end": 10.046,
+      "duration": 10.046,
+      "start_display": "00:00:00.000",
+      "end_display": "00:00:10.046",
+      "action": "remove"
+    },
+    {
+      "index": 1,
+      "start": 10.258,
+      "end": 20.776,
+      "duration": 10.518,
+      "start_display": "00:00:10.258",
+      "end_display": "00:00:20.776",
+      "action": "remove"
+    },
+    {
+      "index": 2,
+      "start": 343.208,
+      "end": 353.614,
+      "duration": 10.406,
+      "start_display": "00:05:43.208",
+      "end_display": "00:05:53.614",
+      "action": "remove"
+    },
+    {
+      "index": 3,
+      "start": 353.614,
+      "end": 369.247,
+      "duration": 15.633,
+      "start_display": "00:05:53.614",
+      "end_display": "00:06:09.247",
+      "action": "remove"
+    },
+    {
+      "index": 4,
+      "start": 851.545,
+      "end": 862.267,
+      "duration": 10.721,
+      "start_display": "00:14:11.545",
+      "end_display": "00:14:22.267",
+      "action": "remove"
+    },
+    {
+      "index": 5,
+      "start": 1083.6,
+      "end": 1091.07,
+      "duration": 7.472,
+      "start_display": "00:18:03.600",
+      "end_display": "00:18:11.070",
+      "action": "remove"
+    },
+    {
+      "index": 6,
+      "start": 1092.01,
+      "end": 1099.31,
+      "duration": 7.305,
+      "start_display": "00:18:12.010",
+      "end_display": "00:18:19.310",
+      "action": "remove"
+    },
+    {
+      "index": 7,
+      "start": 1109.27,
+      "end": 1146.4,
+      "duration": 37.132,
+      "start_display": "00:18:29.270",
+      "end_display": "00:19:06.400",
+      "action": "remove"
+    },
+    {
+      "index": 8,
+      "start": 1148.32,
+      "end": 1159.49,
+      "duration": 11.173,
+      "start_display": "00:19:08.320",
+      "end_display": "00:19:19.490",
+      "action": "remove"
+    },
+    {
+      "index": 9,
+      "start": 1462.82,
+      "end": 1482.77,
+      "duration": 19.953,
+      "start_display": "00:24:22.820",
+      "end_display": "00:24:42.770",
+      "action": "remove"
+    },
+    {
+      "index": 10,
+      "start": 1575.78,
+      "end": 1593.25,
+      "duration": 17.472,
+      "start_display": "00:26:15.780",
+      "end_display": "00:26:33.250",
+      "action": "remove"
+    },
+    {
+      "index": 11,
+      "start": 2171.24,
+      "end": 2176.5,
+      "duration": 5.258,
+      "start_display": "00:36:11.240",
+      "end_display": "00:36:16.500",
+      "action": "remove"
+    },
+    {
+      "index": 12,
+      "start": 2488.03,
+      "end": 2493.16,
+      "duration": 5.129,
+      "start_display": "00:41:28.030",
+      "end_display": "00:41:33.160",
+      "action": "remove"
+    },
+    {
+      "index": 13,
+      "start": 2759.5,
+      "end": 2764.68,
+      "duration": 5.181,
+      "start_display": "00:45:59.500",
+      "end_display": "00:46:04.680",
+      "action": "remove"
+    }
+  ]
+}

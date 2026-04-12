@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ffprobe:*)",
+      "Bash(python -c \":*)",
+      "Bash(done)",
+      "Bash(ffmpeg:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}
