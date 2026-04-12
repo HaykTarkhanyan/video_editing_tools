@@ -34,8 +34,10 @@ def detect_hw_encoder():
             proc = subprocess.run(cmd, capture_output=True, timeout=10)
             if proc.returncode == 0:
                 return name
-        except Exception:
+        except subprocess.TimeoutExpired:
             continue
+        except FileNotFoundError:
+            raise RuntimeError("ffmpeg not found on PATH")
     return None
 
 
@@ -69,15 +71,24 @@ def get_stream_info(filepath, log):
             info["video_codec"] = s["codec_name"]
             info["width"] = int(s["width"])
             info["height"] = int(s["height"])
-            info["pix_fmt"] = s.get("pix_fmt", "yuv420p")
+            if "pix_fmt" not in s:
+                raise RuntimeError(f"No pix_fmt found in video stream of {filepath}")
+            info["pix_fmt"] = s["pix_fmt"]
             num, den = s["r_frame_rate"].split("/")
             info["fps"] = round(int(num) / int(den), 3)
         elif s["codec_type"] == "audio":
             info["audio_codec"] = s["codec_name"]
-            info["sample_rate"] = int(s.get("sample_rate", 48000))
-            info["channels"] = int(s.get("channels", 2))
+            if "sample_rate" not in s:
+                raise RuntimeError(f"No sample_rate found in audio stream of {filepath}")
+            info["sample_rate"] = int(s["sample_rate"])
+            if "channels" not in s:
+                raise RuntimeError(f"No channels found in audio stream of {filepath}")
+            info["channels"] = int(s["channels"])
 
-    info["duration"] = float(data.get("format", {}).get("duration", 0))
+    duration_str = data.get("format", {}).get("duration")
+    if duration_str is None:
+        raise RuntimeError(f"No duration found in format metadata of {filepath}")
+    info["duration"] = float(duration_str)
     log.debug(f"  -> {info.get('width','?')}x{info.get('height','?')} @ {info.get('fps','?')}fps, "
               f"duration={info['duration']:.1f}s, video={info.get('video_codec','?')}, audio={info.get('audio_codec','?')}")
     return info
@@ -230,37 +241,13 @@ def main():
     log.debug(f"First 5 keep intervals: {keep_intervals[:5]}")
     log.debug(f"Last 5 keep intervals: {keep_intervals[-5:]}")
 
-    # ── Prepare intro/outro if needed ──
+    # ── Set up temp dir and intro/outro paths ──
     temp_dir = Path(os.path.dirname(output_path)) / "_temp_build"
     temp_dir.mkdir(parents=True, exist_ok=True)
     log.debug(f"Temp dir: {temp_dir}")
 
-    prepared_intro = None
-    prepared_outro = None
-
-    if args.intro:
-        intro_path = os.path.abspath(args.intro)
-        log.info(f"Checking intro: {intro_path}")
-        intro_info = get_stream_info(intro_path, log)
-        if not metadata_matches(main_info, intro_info):
-            log.info("Intro metadata differs — re-encoding to match main video.")
-            prepared_intro = str(temp_dir / "intro_matched.mp4")
-            reencode_to_match(intro_path, main_info, prepared_intro, log, hw_encoder)
-        else:
-            log.info("Intro metadata matches main video.")
-            prepared_intro = intro_path
-
-    if args.outro:
-        outro_path = os.path.abspath(args.outro)
-        log.info(f"Checking outro: {outro_path}")
-        outro_info = get_stream_info(outro_path, log)
-        if not metadata_matches(main_info, outro_info):
-            log.info("Outro metadata differs — re-encoding to match main video.")
-            prepared_outro = str(temp_dir / "outro_matched.mp4")
-            reencode_to_match(outro_path, main_info, prepared_outro, log, hw_encoder)
-        else:
-            log.info("Outro metadata matches main video.")
-            prepared_outro = outro_path
+    intro_path = os.path.abspath(args.intro) if args.intro else None
+    outro_path = os.path.abspath(args.outro) if args.outro else None
 
     # ── Build the main cleaned video using select/aselect filters ──
     log.info("")
@@ -273,7 +260,8 @@ def main():
     select_expr = "+".join(select_parts)
     log.debug(f"Select expression length: {len(select_expr)} chars")
 
-    main_output = str(temp_dir / "main_cleaned.mp4") if (prepared_intro or prepared_outro) else str(output_path)
+    video_stem = Path(input_path).stem
+    main_output = str(temp_dir / f"{video_stem}_main_cleaned.mp4") if (intro_path or outro_path) else str(output_path)
     log.debug(f"Main output target: {main_output}")
 
     cmd = [
@@ -327,10 +315,37 @@ def main():
     log.info(f"Encoding done in {fmt_duration_short(encode_time)}")
 
     # ── Concatenate intro + main + outro if needed ──
-    # Stream-copy concat: intro/outro must already match the main video's
-    # format (use inputs/intro_matched.mp4 etc.). This is near-instant.
+    # Re-encode intro/outro to match the actual cleaned output's encoding,
+    # then stream-copy concat. This avoids mismatches between different
+    # encoders (e.g. QSV main vs libx264 intro/outro).
     concat_time = 0
-    if prepared_intro or prepared_outro:
+    if intro_path or outro_path:
+        log.info("Preparing intro/outro to match cleaned output...")
+        cleaned_info = get_stream_info(main_output, log)
+
+        prepared_intro = None
+        prepared_outro = None
+
+        if intro_path:
+            intro_info = get_stream_info(intro_path, log)
+            if not metadata_matches(cleaned_info, intro_info):
+                log.info("Intro differs from cleaned output — re-encoding to match.")
+                prepared_intro = str(temp_dir / "intro_matched.mp4")
+                reencode_to_match(intro_path, cleaned_info, prepared_intro, log, hw_encoder)
+            else:
+                log.info("Intro matches cleaned output.")
+                prepared_intro = intro_path
+
+        if outro_path:
+            outro_info = get_stream_info(outro_path, log)
+            if not metadata_matches(cleaned_info, outro_info):
+                log.info("Outro differs from cleaned output — re-encoding to match.")
+                prepared_outro = str(temp_dir / "outro_matched.mp4")
+                reencode_to_match(outro_path, cleaned_info, prepared_outro, log, hw_encoder)
+            else:
+                log.info("Outro matches cleaned output.")
+                prepared_outro = outro_path
+
         log.info("Concatenating intro/main/outro (stream-copy)...")
         concat_start = time.time()
 
@@ -365,9 +380,12 @@ def main():
             sys.exit(1)
         log.info(f"Concat done in {fmt_duration_short(concat_time)}")
 
-    # ── Cleanup temp files ──
+    # ── Cleanup temp files (keep main_cleaned for re-concat) ──
     log.info("Cleaning up temp files...")
     for tmp_file in temp_dir.glob("*"):
+        if "_main_cleaned.mp4" in tmp_file.name:
+            log.info(f"  Keeping: {tmp_file}")
+            continue
         try:
             log.debug(f"  Deleting: {tmp_file}")
             tmp_file.unlink(missing_ok=True)

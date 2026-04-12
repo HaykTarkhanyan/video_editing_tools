@@ -35,8 +35,10 @@ def detect_hw_encoder():
             proc = subprocess.run(cmd, capture_output=True, timeout=10)
             if proc.returncode == 0:
                 return name
-        except Exception:
+        except subprocess.TimeoutExpired:
             continue
+        except FileNotFoundError:
+            raise RuntimeError("ffmpeg not found on PATH")
     return None
 
 
@@ -128,13 +130,14 @@ def get_fps(input_path):
         "-show_streams", input_path
     ]
     result = subprocess.run(cmd, capture_output=True, text=True)
-    if result.returncode == 0:
-        data = json.loads(result.stdout)
-        for s in data.get("streams", []):
-            if s["codec_type"] == "video":
-                num, den = s["r_frame_rate"].split("/")
-                return round(int(num) / int(den), 3)
-    return 25  # fallback
+    if result.returncode != 0:
+        raise RuntimeError(f"ffprobe failed on {input_path}: {result.stderr[-300:]}")
+    data = json.loads(result.stdout)
+    for s in data.get("streams", []):
+        if s["codec_type"] == "video":
+            num, den = s["r_frame_rate"].split("/")
+            return round(int(num) / int(den), 3)
+    raise RuntimeError(f"No video stream found in {input_path}")
 
 
 def create_review_video(input_path, segments, output_dir, log, hw_encoder=None):
@@ -210,7 +213,8 @@ def create_review_video(input_path, segments, output_dir, log, hw_encoder=None):
             f.write(f"file '{safe_path}'\n")
 
     # Concatenate all segments
-    review_path = output_dir / "review_segments.mp4"
+    video_stem = Path(input_path).stem
+    review_path = output_dir / f"{video_stem}_review_segments.mp4"
     log.info(f"Concatenating {len(segment_files)} segments into review video...")
     concat_t0 = time.time()
     cmd = [
@@ -307,7 +311,8 @@ def main():
         sys.exit(0)
 
     # ── Step 2: save JSON ──
-    json_path = os.path.join(output_dir, "silence_segments.json")
+    video_stem = Path(input_path).stem
+    json_path = os.path.join(output_dir, f"{video_stem}_silence_segments.json")
     payload = {
         "input": input_path,
         "threshold_seconds": args.threshold,

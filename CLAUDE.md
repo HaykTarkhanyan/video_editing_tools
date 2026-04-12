@@ -20,7 +20,7 @@ No build step, no tests, no linting configured. Scripts are run directly.
 
 ## Architecture
 
-**detect_silence.py** -> runs ffmpeg silencedetect filter -> parses stderr with regex -> writes `silence_segments.json` + optional `review_segments.mp4` (numbered overlays on each silence clip for visual QA).
+**detect_silence.py** -> runs ffmpeg silencedetect filter -> parses stderr with regex -> writes `<video_name>_silence_segments.json` + optional `<video_name>_review_segments.mp4` (numbered overlays on each silence clip for visual QA).
 
 **remove_silence.py** -> reads segments JSON -> builds ffmpeg `select`/`aselect` filter expressions with `between()` to keep non-silent intervals -> single-pass encode -> concat intro/outro via stream-copy (concat demuxer). Intro/outro are re-encoded to match main video metadata (resolution, fps, pixel format, sample rate, channels) only if they don't already match.
 
@@ -28,7 +28,7 @@ No build step, no tests, no linting configured. Scripts are run directly.
 
 ## Key Design Decisions
 
-- **GPU: Intel Iris Xe (integrated, no CUDA)**. NVENC is not available. QSV (h264_qsv) is the only HW encoder option; otherwise falls back to libx264 CPU. Always use `--no-gpu` or QSV - never assume NVENC.
+- **GPU: Intel Iris Xe (integrated, no CUDA)**. NVENC is not available. QSV (h264_qsv) is the only HW encoder option; otherwise falls back to libx264 CPU. Let the scripts auto-detect QSV - do NOT pass `--no-gpu` unless explicitly asked.
 - **Never run multiple ffmpeg encodes in parallel.** The machine cannot handle it - run sequentially and ask user before starting intensive work.
 - Intro/outro concat uses stream-copy (near-instant) after ensuring format compatibility via conditional re-encode.
 - Segments JSON uses `"action": "remove"` convention - `build_keep_intervals()` inverts these to keep-ranges.
