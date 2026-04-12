@@ -212,5 +212,4 @@ __marimo__/
 *.avi
 *.mov
 *.webm
-!inputs/intro_matched.mp4
-!inputs/outro_matched.mp4
+!assets/*.mp4
