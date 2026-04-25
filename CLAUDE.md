@@ -18,6 +18,15 @@ python remove_silence.py <input.mp4> <segments.json> -o output.mp4 [--intro FILE
 
 No build step, no tests, no linting configured. Scripts are run directly.
 
+## Quick Start: New Video
+
+When the user adds a new video to `todo/`, follow the **`process-video` skill** (`.claude/skills/process-video/SKILL.md`). Short version:
+
+1. Probe specs with `ffprobe`.
+2. Check `assets/` for an existing intro/outro at the same resolution - copy if match, otherwise re-encode from `assets/intro-attemt-2.mp4` and `assets/outro.mp4`.
+3. Run `detect_silence.py` (background it).
+4. Run `remove_silence.py` with the per-video `--intro` and `--outro` (background it).
+
 ## Architecture
 
 **detect_silence.py** -> runs ffmpeg silencedetect filter -> parses stderr with regex -> writes `<video_name>_silence_segments.json` + optional `<video_name>_review_segments.mp4` (numbered overlays on each silence clip for visual QA).
@@ -41,14 +50,16 @@ ffmpeg and ffprobe must be on PATH.
 ## File Conventions
 
 - `assets/` - intro/outro template videos (tracked in git despite .gitignore video exclusion). Per-video variants named `arnak-NN-intro.mp4` / `arnak-NN-outro.mp4` are pre-encoded to match each video's resolution for instant stream-copy concat.
-- `todo/` - raw videos awaiting processing (not tracked). Current batch: arnak-04 through arnak-08 (iPad recordings, mostly portrait, varying resolutions).
+- `todo/` - raw videos awaiting processing (not tracked). Current batch: arnak-04 through arnak-09 (iPad recordings, mostly portrait, varying resolutions).
 - `wip/` - working directory for logs and temp files (not tracked)
 
 ## Video Specs
 
 Source videos (arnak series) are iPad recordings with inconsistent resolutions. Always probe before assuming dimensions:
 - arnak-04/06: 1664x1920 (portrait)
-- arnak-05: 1760x1920 (portrait)
+- arnak-05/09: 1760x1920 (portrait)
 - arnak-07: 3414x1920 (ultra-wide composite)
 - arnak-08: 1920x1080 (landscape)
 - All share: h264, yuv420p, 25fps, aac 48kHz stereo
+
+When a new video matches an existing resolution, **copy** the corresponding `assets/arnak-NN-intro.mp4` / `arnak-NN-outro.mp4` instead of re-encoding (instant, no quality loss).
